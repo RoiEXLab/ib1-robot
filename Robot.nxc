@@ -1,0 +1,25 @@
+#define MAX_DISTANCE_MS 0.46232
+#define DISTANCE_TIRES_MM 165
+#define THRESHOLD 45
+
+sub turn_degrees(int degrees, int speed){
+    OnFwd(OUT_A, speed);
+    OnRev(OUT_B, speed);
+    Wait(DISTANCE_TIRES_MM * RADIANS_PER_DEGREE * MAX_DISTANCE_MS);
+    Off(OUT_AB);
+}
+
+task main(){
+     //Sensor 1 LEFT 2 Middle 3 Right
+     SetSensorLight(IN_1);
+     SetSensorLight(IN_2);
+     SetSensorLight(IN_3);
+     while(true){
+                 if(SENSOR_1 < THRESHOLD){
+                             turn_degrees(-10, 100);
+                 }
+                 if(SENSOR_3 < THRESHOLD){
+                             turn_degrees(10, 100);
+                 }//TODO doesn't work as expected!
+     }
+}
