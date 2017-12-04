@@ -3,23 +3,52 @@
 #define THRESHOLD 45
 
 sub turn_degrees(int degrees, int speed){
-    OnFwd(OUT_A, speed);
-    OnRev(OUT_B, speed);
-    Wait(DISTANCE_TIRES_MM * RADIANS_PER_DEGREE * MAX_DISTANCE_MS);
-    Off(OUT_AB);
+	OnFwd(OUT_A, speed);
+	OnRev(OUT_B, speed);
+	Wait(DISTANCE_TIRES_MM * RADIANS_PER_DEGREE * MAX_DISTANCE_MS);
+	Off(OUT_AB);
+}
+
+inline int get_turn_degrees(){
+	if(SENSOR_1 < THRESHOLD){
+		if(SENSOR_2 < THRESHOLD){
+			if(SENSOR_3 < THRESHOLD){
+				return 90;
+			} else {
+				return -45;
+			}
+		} else {
+			if(SENSOR_3 < THRESHOLD){
+				return 0;
+			} else {
+				return -90;
+			}
+		}
+	} else {
+		if(SENSOR_2 < THRESHOLD){
+			if(SENSOR_3 < THRESHOLD){
+				return 45;
+			} else {
+				return 0;
+			}
+		} else {
+			if(SENSOR_3 < THRESHOLD){
+				return 90;
+			} else {
+				return 360;
+			}
+		}
+	}
 }
 
 task main(){
-     //Sensor 1 LEFT 2 Middle 3 Right
-     SetSensorLight(IN_1);
-     SetSensorLight(IN_2);
-     SetSensorLight(IN_3);
-     while(true){
-                 if(SENSOR_1 < THRESHOLD){
-                             turn_degrees(-10, 100);
-                 }
-                 if(SENSOR_3 < THRESHOLD){
-                             turn_degrees(10, 100);
-                 }//TODO doesn't work as expected!
-     }
+	//Sensor 1 LEFT 2 Middle 3 Right
+	SetSensorLight(IN_1);
+	SetSensorLight(IN_2);
+	SetSensorLight(IN_3);
+	while(true){
+		turn_degrees(get_turn_degrees(), 100);
+		OnFwd(OUT_AB, 100);
+		Wait(100);
+	}
 }
