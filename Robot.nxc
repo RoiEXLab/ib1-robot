@@ -1,11 +1,18 @@
 #define MAX_DISTANCE_MS 0.46232
-#define DISTANCE_TIRES_MM 165
+#define DISTANCE_TIRES_MM 155
 #define THRESHOLD 45
 
 sub turn_degrees(int degrees, int speed){
-	OnFwd(OUT_A, speed);
-	OnRev(OUT_B, speed);
-	Wait(DISTANCE_TIRES_MM * RADIANS_PER_DEGREE * MAX_DISTANCE_MS);
+	int signedSpeed = speed * (degrees / abs(degrees));
+	OnFwd(OUT_A, signedSpeed);
+	OnRev(OUT_B, signedSpeed);
+	float distance = abs(PI * DISTANCE_TIRES_MM * (degrees / 360.0));
+	float velocity = MAX_DISTANCE_MS * (speed / 100.0) * 2;
+	int waitTime = distance / velocity;
+	//TextOut(0, 0, "wait: " + NumToStr(waitTime));
+	//TextOut(0, 10, "distance: " + NumToStr(distance));
+	//TextOut(0, 20, "velocity: " + NumToStr(velocity));
+	Wait(waitTime);
 	Off(OUT_AB);
 }
 
@@ -13,29 +20,29 @@ inline int get_turn_degrees(){
 	if(SENSOR_1 < THRESHOLD){
 		if(SENSOR_2 < THRESHOLD){
 			if(SENSOR_3 < THRESHOLD){
-				return 90;
+				return 0;
 			} else {
-				return -45;
+				return -5;
 			}
 		} else {
 			if(SENSOR_3 < THRESHOLD){
 				return 0;
 			} else {
-				return -90;
+				return -10;
 			}
 		}
 	} else {
 		if(SENSOR_2 < THRESHOLD){
 			if(SENSOR_3 < THRESHOLD){
-				return 45;
+				return 5;
 			} else {
 				return 0;
 			}
 		} else {
 			if(SENSOR_3 < THRESHOLD){
-				return 90;
+				return 10;
 			} else {
-				return 360;
+				return 0;
 			}
 		}
 	}
@@ -47,8 +54,10 @@ task main(){
 	SetSensorLight(IN_2);
 	SetSensorLight(IN_3);
 	while(true){
-		turn_degrees(get_turn_degrees(), 100);
-		OnFwd(OUT_AB, 100);
-		Wait(100);
+		int degrees = get_turn_degrees();
+		TextOut(0, 0, NumToStr(degrees));
+		turn_degrees(degrees, 60);
+		OnRev(OUT_AB, 60);
+		Wait(10);
 	}
 }
