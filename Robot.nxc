@@ -1,17 +1,14 @@
-#define MAX_DISTANCE_MS 0.46232
+#define MAX_DISTANCE_MS 0.07705
 #define DISTANCE_TIRES_MM 155
 #define THRESHOLD 45
 
 sub turn_degrees(int degrees, int speed){
 	int signedSpeed = speed * (degrees / abs(degrees));
-	OnFwd(OUT_A, signedSpeed);
-	OnRev(OUT_B, signedSpeed);
+	OnFwd(OUT_A, -signedSpeed);
+	OnFwd(OUT_B, signedSpeed);
 	float distance = abs(PI * DISTANCE_TIRES_MM * (degrees / 360.0));
 	float velocity = MAX_DISTANCE_MS * (speed / 100.0) * 2;
 	int waitTime = distance / velocity;
-	//TextOut(0, 0, "wait: " + NumToStr(waitTime));
-	//TextOut(0, 10, "distance: " + NumToStr(distance));
-	//TextOut(0, 20, "velocity: " + NumToStr(velocity));
 	Wait(waitTime);
 	Off(OUT_AB);
 }
@@ -56,8 +53,8 @@ task main(){
 	while(true){
 		int degrees = get_turn_degrees();
 		TextOut(0, 0, NumToStr(degrees));
-		turn_degrees(degrees, 60);
-		OnRev(OUT_AB, 60);
+		turn_degrees(degrees, 80);
+		OnFwd(OUT_AB, 100);
 		Wait(10);
 	}
 }
