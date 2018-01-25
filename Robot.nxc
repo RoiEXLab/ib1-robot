@@ -13,6 +13,14 @@ sub turn_degrees(int degrees, int speed){
 	Off(OUT_AB);
 }
 
+sub dump(){
+	OnRev(OUT_C, DUMP_SPEED);
+	Wait(DUMP_TIME * 1000);
+	OnFwd(OUT_C, DUMP_SPEED);
+	Wait(DUMP_TIME * 1000);
+	Off(OUT_C);
+}
+
 inline int get_turn_degrees(){
 	if(SENSOR_1 < THRESHOLD){
 		if(SENSOR_2 < THRESHOLD){
