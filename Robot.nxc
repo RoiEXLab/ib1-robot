@@ -6,8 +6,8 @@
 
 sub turn_degrees(int degrees, int speed){
 	int signedSpeed = speed * (degrees / abs(degrees));
-	OnFwd(OUT_A, -signedSpeed);
-	OnFwd(OUT_B, signedSpeed);
+	OnFwd(OUT_A, signedSpeed);
+	OnRev(OUT_B, signedSpeed);
 	float distance = abs(PI * DISTANCE_TIRES_MM * (degrees / 360.0));
 	float velocity = MAX_DISTANCE_MS * (speed / 100.0) * 2;
 	int waitTime = distance / velocity;
@@ -64,7 +64,7 @@ task main(){
 		int degrees = get_turn_degrees();
 		TextOut(0, 0, NumToStr(degrees));
 		turn_degrees(degrees, 80);
-		OnFwd(OUT_AB, 100);
+		OnRev(OUT_AB, 100);
 		Wait(10);
 	}
 }
