@@ -55,16 +55,38 @@ inline int get_turn_degrees(){
 	}
 }
 
-task main(){
+sub move(){
+	int degrees = get_turn_degrees();
+	TextOut(0, 0, NumToStr(degrees));
+	turn_degrees(degrees, 80);
+	OnRev(OUT_AB, 100);
+	Wait(10);
+}
+
+string state = "default";
+
+sub special(){
+	switch(state){
+		case "finish":
+			dump();
+			Stop(true);
+			break;
+	}
+}
+
+sub init(){
 	//Sensor 1 LEFT 2 Middle 3 Right
 	SetSensorLight(IN_1);
 	SetSensorLight(IN_2);
 	SetSensorLight(IN_3);
+}
+
+task main(){
+	init();
 	while(true){
-		int degrees = get_turn_degrees();
-		TextOut(0, 0, NumToStr(degrees));
-		turn_degrees(degrees, 80);
-		OnRev(OUT_AB, 100);
-		Wait(10);
+		if(state != "default"){
+			special();
+		}
+		move();
 	}
 }
