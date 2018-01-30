@@ -16,6 +16,8 @@ sub turn_degrees(int degrees, int speed){
 }
 
 sub dump(){
+	Wait(500);
+	Off(OUT_AB);
 	OnRev(OUT_C, DUMP_SPEED);
 	Wait(DUMP_TIME * 1000);
 	OnFwd(OUT_C, DUMP_SPEED);
@@ -23,10 +25,13 @@ sub dump(){
 	Off(OUT_C);
 }
 
+string state = "default";
+
 inline int get_turn_degrees(){
 	if(SENSOR_1 < THRESHOLD){
 		if(SENSOR_2 < THRESHOLD){
 			if(SENSOR_3 < THRESHOLD){
+				state = "finish";
 				return 0;
 			} else {
 				return -5;
@@ -62,8 +67,6 @@ sub move(){
 	OnRev(OUT_AB, 100);
 	Wait(10);
 }
-
-string state = "default";
 
 sub special(){
 	switch(state){
