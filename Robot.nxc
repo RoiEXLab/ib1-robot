@@ -1,8 +1,30 @@
 #define MAX_DISTANCE_MS 0.07705
 #define DISTANCE_TIRES_MM 155
 #define THRESHOLD 40
-#define DUMP_TIME 3
+#define MIN_DISTANCE 0 //TODO: Enddistanz ausmessen
+#define BALL_DISTANCE 0 //TODO: Ballabwurfdistanz ausmessen
+#define LOAD_TIME 0 //TODO: Beladezeit rausfinden
+#define FELT_DOWN 0 //TODO: Abstand für Schiebeaufgabe
+#define DUMP_TIME 1
 #define DUMP_SPEED 50
+
+enum State { DEF, GET, PUSH, END } current_state;
+int whiteCount = 0; // Nazi Constant (zwar nicht konstant, aber nazi)
+
+sub eventChecker() {
+  if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD) {
+    whiteCount++; // Nazi spotted
+  }
+  else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SENSOR_4 < MIN_DISTANCE) {
+    current_state = END;
+  }
+  else if (whiteCount >= 3) {
+    current_state = PUSH;
+  }
+  else if (SENSOR_4 < BALL_DISTANCE) {
+    current_state = GET;
+  }
+}
 
 sub turn_degrees(int degrees, int speed){
 	int signedSpeed = speed * (degrees / abs(degrees));
@@ -18,20 +40,31 @@ sub turn_degrees(int degrees, int speed){
 sub dump(){
 	Wait(500);
 	Off(OUT_AB);
-	OnRev(OUT_C, DUMP_SPEED);
-	Wait(DUMP_TIME * 1000);
 	OnFwd(OUT_C, DUMP_SPEED);
+	Wait(DUMP_TIME * 1000);
+	OnRev(OUT_C, DUMP_SPEED);
 	Wait(DUMP_TIME * 1000);
 	Off(OUT_C);
 }
 
-string state = "default";
+sub getSomeBalls() {
+  Off(OUT_AB);
+  Wait(LOAD_TIME);
+  current_state = DEF;
+}
+
+sub pushItToTheLimit() {
+  while (SENSOR_4 < FELT_DOWN) {
+    OnRev(OUT_AB, 50);
+    Wait(10);
+  }
+  current_state = DEF;
+}
 
 inline int get_turn_degrees(){
 	if(SENSOR_1 < THRESHOLD){
 		if(SENSOR_2 < THRESHOLD){
 			if(SENSOR_3 < THRESHOLD){
-				state = "finish";
 				return 0;
 			} else {
 				return -5;
@@ -69,8 +102,14 @@ sub move(){
 }
 
 sub special(){
-	switch(state){
-		case "finish":
+	switch(current_state){
+    case GET:
+      getSomeBalls();
+      break;
+    case PUSH:
+      pushItToTheLimit();
+      break;
+		case END:
 			dump();
 			Stop(true);
 			break;
@@ -78,18 +117,18 @@ sub special(){
 }
 
 sub init(){
+  current_state = DEF;
 	//Sensor 1 LEFT 2 Middle 3 Right
 	SetSensorLight(IN_1);
 	SetSensorLight(IN_2);
 	SetSensorLight(IN_3);
+	SetSensorUltrasonic(IN_4);
 }
 
 task main(){
-	init();
+  init();
 	while(true){
-		if(state != "default"){
-			special();
-		}
+	  special();
 		move();
 	}
 }
