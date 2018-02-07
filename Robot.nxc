@@ -1,5 +1,5 @@
-#define MAX_DISTANCE_MS 0.07705
-#define DISTANCE_TIRES_MM 155
+#define MAX_DISTANCE_MS 0.31 // 0.07705
+#define DISTANCE_TIRES_MM 165
 #define THRESHOLD 40
 #define MIN_DISTANCE 0 //TODO: Enddistanz ausmessen
 #define BALL_DISTANCE 0 //TODO: Ballabwurfdistanz ausmessen
@@ -8,33 +8,40 @@
 #define DUMP_TIME 1
 #define DUMP_SPEED 50
 
-enum State { DEF, GET, PUSH, END } current_state;
+enum State { START, DEF, GET, PUSH, END } current_state;
 int whiteCount = 0; // Nazi Constant (zwar nicht konstant, aber nazi)
 
 sub eventChecker() {
   if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD) {
     whiteCount++; // Nazi spotted
   }
-  else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SENSOR_4 < MIN_DISTANCE) {
+  else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < MIN_DISTANCE) {
     current_state = END;
   }
   else if (whiteCount >= 3) {
     current_state = PUSH;
   }
-  else if (SENSOR_4 < BALL_DISTANCE) {
+  else if (SensorUS(IN_4) < BALL_DISTANCE) {
     current_state = GET;
   }
 }
 
-sub turn_degrees(int degrees, int speed){
-	int signedSpeed = speed * (degrees / abs(degrees));
+sub turn_degrees(float degrees, int speed){
+  float signedSpeed = speed * (degrees / abs(degrees));
 	OnFwd(OUT_A, signedSpeed);
 	OnRev(OUT_B, signedSpeed);
 	float distance = abs(PI * DISTANCE_TIRES_MM * (degrees / 360.0));
-	float velocity = MAX_DISTANCE_MS * (speed / 100.0) * 2;
+	float velocity = MAX_DISTANCE_MS * (speed / 100.0);
 	int waitTime = distance / velocity;
 	Wait(waitTime);
 	Off(OUT_AB);
+}
+
+sub start_session() {
+  if (true) {
+    turn_degrees(200, 100);
+    current_state = DEF;
+  }
 }
 
 sub dump(){
@@ -54,38 +61,39 @@ sub getSomeBalls() {
 }
 
 sub pushItToTheLimit() {
-  while (SENSOR_4 < FELT_DOWN) {
+  turn_degrees(90, 75);
+  while (SensorUS(IN_4) < FELT_DOWN) {
     OnRev(OUT_AB, 50);
     Wait(10);
   }
   current_state = DEF;
 }
 
-inline int get_turn_degrees(){
+inline float get_turn_degrees(){
 	if(SENSOR_1 < THRESHOLD){
 		if(SENSOR_2 < THRESHOLD){
 			if(SENSOR_3 < THRESHOLD){
 				return 0;
 			} else {
-				return -5;
+				return -19;
 			}
 		} else {
 			if(SENSOR_3 < THRESHOLD){
 				return 0;
 			} else {
-				return -10;
+				return -19;
 			}
 		}
 	} else {
 		if(SENSOR_2 < THRESHOLD){
 			if(SENSOR_3 < THRESHOLD){
-				return 5;
+				return 9;
 			} else {
 				return 0;
 			}
 		} else {
 			if(SENSOR_3 < THRESHOLD){
-				return 10;
+				return 19;
 			} else {
 				return 0;
 			}
@@ -94,8 +102,7 @@ inline int get_turn_degrees(){
 }
 
 sub move(){
-	int degrees = get_turn_degrees();
-	TextOut(0, 0, NumToStr(degrees));
+	float degrees = get_turn_degrees();
 	turn_degrees(degrees, 80);
 	OnRev(OUT_AB, 100);
 	Wait(10);
@@ -103,6 +110,8 @@ sub move(){
 
 sub special(){
 	switch(current_state){
+    case START:
+      start_session();
     case GET:
       getSomeBalls();
       break;
@@ -117,12 +126,17 @@ sub special(){
 }
 
 sub init(){
-  current_state = DEF;
-	//Sensor 1 LEFT 2 Middle 3 Right
+  current_state = START;
+	//Sensor 1 LEFT 2 MIDDLE 3 RIGHT
+	/*
+  (\_/)
+  ( •,•)
+  (")_(")
+	*/
 	SetSensorLight(IN_1);
 	SetSensorLight(IN_2);
 	SetSensorLight(IN_3);
-	SetSensorUltrasonic(IN_4);
+	SetSensorLowspeed(IN_4);
 }
 
 task main(){
