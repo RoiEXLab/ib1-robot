@@ -26,7 +26,7 @@ sub eventChecker() {
 	}
 }
 
-sub turn_degrees(float degrees, int speed){
+sub turn_degrees(float degrees, int speed) {
 	float signedSpeed = speed * (degrees / abs(degrees));
 	OnFwd(OUT_A, signedSpeed);
 	OnRev(OUT_B, signedSpeed);
@@ -44,7 +44,7 @@ sub start_session() {
 	}
 }
 
-sub dump(){
+sub dump() {
 	Wait(500);
 	Off(OUT_AB);
 	OnFwd(OUT_C, DUMP_SPEED);
@@ -69,30 +69,30 @@ sub pushItToTheLimit() {
 	current_state = DEF;
 }
 
-inline float get_turn_degrees(){
-	if(SENSOR_1 < THRESHOLD){
-		if(SENSOR_2 < THRESHOLD){
-			if(SENSOR_3 < THRESHOLD){
+inline float get_turn_degrees() {
+	if(SENSOR_1 < THRESHOLD) {
+		if(SENSOR_2 < THRESHOLD) {
+			if(SENSOR_3 < THRESHOLD) {
 				return 0;
 			} else {
 				return -19;
 			}
 		} else {
-			if(SENSOR_3 < THRESHOLD){
+			if(SENSOR_3 < THRESHOLD) {
 				return 0;
 			} else {
 				return -19;
 			}
 		}
 	} else {
-		if(SENSOR_2 < THRESHOLD){
-			if(SENSOR_3 < THRESHOLD){
+		if(SENSOR_2 < THRESHOLD) {
+			if(SENSOR_3 < THRESHOLD) {
 				return 9;
 			} else {
 				return 0;
 			}
 		} else {
-			if(SENSOR_3 < THRESHOLD){
+			if(SENSOR_3 < THRESHOLD) {
 				return 19;
 			} else {
 				return 0;
@@ -101,15 +101,15 @@ inline float get_turn_degrees(){
 	}
 }
 
-sub move(){
+sub move() {
 	float degrees = get_turn_degrees();
 	turn_degrees(degrees, 80);
 	OnRev(OUT_AB, 100);
 	Wait(10);
 }
 
-sub special(){
-	switch(current_state){
+sub special() {
+	switch(current_state) {
 		case START:
 			start_session();
 		case GET:
@@ -125,7 +125,7 @@ sub special(){
 	}
 }
 
-sub init(){
+sub init() {
 	current_state = START;
 	//Sensor 1 LEFT 2 MIDDLE 3 RIGHT
 	/*
@@ -139,9 +139,9 @@ sub init(){
 	SetSensorLowspeed(IN_4);
 }
 
-task main(){
+task main() {
 	init();
-	while(true){
+	while(true) {
 		special();
 		move();
 	}
