@@ -16,7 +16,17 @@
 #define DUMP_TIME 1
 #define DUMP_SPEED 50
 
-enum State { START, MOVE_1, GET, MOVE_2, PUSH, MOVE_3, MOVE_4, END } current_state;
+enum State {
+	INIT,
+	MOVE_1,
+	GET,
+	MOVE_2,
+	PUSH,
+	MOVE_3,
+	MOVE_4,
+	END
+};
+State current_state;
 int whiteCount = 0;
 
 sub turn_degrees(float degrees, int speed) {
@@ -31,7 +41,7 @@ sub turn_degrees(float degrees, int speed) {
 }
 
 sub check_for_special_event() {
-	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD && current_state != START) {
+	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD && current_state != INIT) {
 		whiteCount++;
 	}	else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < END_DISTANCE && current_state == MOVE_4) {
 		current_state = END;
@@ -120,7 +130,7 @@ sub move() {
 
 sub run_special_event_if_available() {
 	switch(current_state) {
-		case START:
+		case INIT:
 			turn_after_start();
 		case GET:
 			catch_ball();
@@ -136,7 +146,7 @@ sub run_special_event_if_available() {
 }
 
 sub init() {
-	current_state = START;
+	current_state = INIT;
 	//Sensor 1 LEFT 2 MIDDLE 3 RIGHT
 	SetSensorLight(IN_1);
 	SetSensorLight(IN_2);
