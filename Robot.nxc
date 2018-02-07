@@ -19,7 +19,7 @@
 enum State { START, DEF, GET, PUSH, END } current_state;
 int whiteCount = 0;
 
-sub eventChecker() {
+sub check_for_special_event() {
 	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD && current_state != START) {
 		whiteCount++;
 	}	else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < MIN_DISTANCE) {
@@ -42,7 +42,7 @@ sub turn_degrees(float degrees, int speed) {
 	Off(OUT_AB);
 }
 
-sub start_session() {
+sub turn_after_start() {
 	if (SensorUS(IN_4) < START_TURN_DISTANCE && SENSOR_2 > THRESHOLD) {
 		turn_degrees(200, 100);
 		current_state = DEF;
@@ -59,13 +59,13 @@ sub dump() {
 	Off(OUT_C);
 }
 
-sub getSomeBalls() {
+sub catch_ball() {
 	Off(OUT_AB);
 	Wait(LOAD_TIME);
 	current_state = DEF;
 }
 
-sub pushItToTheLimit() {
+sub push_obstacle() {
 	turn_degrees(90, 75);
 	while (SensorUS(IN_4) < FELT_DOWN) {
 		OnRev(OUT_AB, 50);
@@ -113,15 +113,15 @@ sub move() {
 	Wait(10);
 }
 
-sub special() {
+sub run_special_event_if_available() {
 	switch(current_state) {
 		case START:
-			start_session();
+			turn_after_start();
 		case GET:
-			getSomeBalls();
+			catch_ball();
 			break;
 		case PUSH:
-			pushItToTheLimit();
+			push_obstacle();
 			break;
 		case END:
 			dump();
@@ -142,7 +142,8 @@ sub init() {
 task main() {
 	init();
 	while(true) {
-		special();
+		check_for_special_event();
+		run_special_event_if_available();
 		move();
 	}
 }
