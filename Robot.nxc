@@ -10,6 +10,7 @@
 #define BALL_DISTANCE 0 // TODO: Ballabwurfdistanz ausmessen
 #define LOAD_TIME 0 // TODO: Beladezeit rausfinden
 #define FELT_DOWN 0 // TODO: Abstand für Schiebeaufgabe
+#define START_TURN_DISTANCE 20 // TODO: Satz des Pythagoras
 
 // Dumping
 #define DUMP_TIME 1
@@ -19,16 +20,13 @@ enum State { START, DEF, GET, PUSH, END } current_state;
 int whiteCount = 0;
 
 sub eventChecker() {
-	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD) {
+	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD && current_state != START) {
 		whiteCount++;
-	}
-	else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < MIN_DISTANCE) {
+	}	else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < MIN_DISTANCE) {
 		current_state = END;
-	}
-	else if (whiteCount >= 3) {
+	}	else if (whiteCount >= 3) {
 		current_state = PUSH;
-	}
-	else if (SensorUS(IN_4) < BALL_DISTANCE) {
+	}	else if (SensorUS(IN_4) < BALL_DISTANCE) {
 		current_state = GET;
 	}
 }
@@ -45,7 +43,7 @@ sub turn_degrees(float degrees, int speed) {
 }
 
 sub start_session() {
-	if (true) {
+	if (SensorUS(IN_4) < START_TURN_DISTANCE && SENSOR_2 > THRESHOLD) {
 		turn_degrees(200, 100);
 		current_state = DEF;
 	}
@@ -70,8 +68,8 @@ sub getSomeBalls() {
 sub pushItToTheLimit() {
 	turn_degrees(90, 75);
 	while (SensorUS(IN_4) < FELT_DOWN) {
-	OnRev(OUT_AB, 50);
-	Wait(10);
+		OnRev(OUT_AB, 50);
+		Wait(10);
 	}
 	current_state = DEF;
 }
