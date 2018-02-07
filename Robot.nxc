@@ -12,22 +12,22 @@ enum State { START, DEF, GET, PUSH, END } current_state;
 int whiteCount = 0; // Nazi Constant (zwar nicht konstant, aber nazi)
 
 sub eventChecker() {
-  if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD) {
-    whiteCount++; // Nazi spotted
-  }
-  else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < MIN_DISTANCE) {
-    current_state = END;
-  }
-  else if (whiteCount >= 3) {
-    current_state = PUSH;
-  }
-  else if (SensorUS(IN_4) < BALL_DISTANCE) {
-    current_state = GET;
-  }
+	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD) {
+		whiteCount++; // Nazi spotted
+	}
+	else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < MIN_DISTANCE) {
+		current_state = END;
+	}
+	else if (whiteCount >= 3) {
+		current_state = PUSH;
+	}
+	else if (SensorUS(IN_4) < BALL_DISTANCE) {
+		current_state = GET;
+	}
 }
 
 sub turn_degrees(float degrees, int speed){
-  float signedSpeed = speed * (degrees / abs(degrees));
+	float signedSpeed = speed * (degrees / abs(degrees));
 	OnFwd(OUT_A, signedSpeed);
 	OnRev(OUT_B, signedSpeed);
 	float distance = abs(PI * DISTANCE_TIRES_MM * (degrees / 360.0));
@@ -38,10 +38,10 @@ sub turn_degrees(float degrees, int speed){
 }
 
 sub start_session() {
-  if (true) {
-    turn_degrees(200, 100);
-    current_state = DEF;
-  }
+	if (true) {
+		turn_degrees(200, 100);
+		current_state = DEF;
+	}
 }
 
 sub dump(){
@@ -55,18 +55,18 @@ sub dump(){
 }
 
 sub getSomeBalls() {
-  Off(OUT_AB);
-  Wait(LOAD_TIME);
-  current_state = DEF;
+	Off(OUT_AB);
+	Wait(LOAD_TIME);
+	current_state = DEF;
 }
 
 sub pushItToTheLimit() {
-  turn_degrees(90, 75);
-  while (SensorUS(IN_4) < FELT_DOWN) {
-    OnRev(OUT_AB, 50);
-    Wait(10);
-  }
-  current_state = DEF;
+	turn_degrees(90, 75);
+	while (SensorUS(IN_4) < FELT_DOWN) {
+	OnRev(OUT_AB, 50);
+	Wait(10);
+	}
+	current_state = DEF;
 }
 
 inline float get_turn_degrees(){
@@ -110,14 +110,14 @@ sub move(){
 
 sub special(){
 	switch(current_state){
-    case START:
-      start_session();
-    case GET:
-      getSomeBalls();
-      break;
-    case PUSH:
-      pushItToTheLimit();
-      break;
+		case START:
+			start_session();
+		case GET:
+			getSomeBalls();
+			break;
+		case PUSH:
+			pushItToTheLimit();
+			break;
 		case END:
 			dump();
 			Stop(true);
@@ -126,12 +126,12 @@ sub special(){
 }
 
 sub init(){
-  current_state = START;
+	current_state = START;
 	//Sensor 1 LEFT 2 MIDDLE 3 RIGHT
 	/*
-  (\_/)
-  ( •,•)
-  (")_(")
+	(\_/)
+	( •,•)
+	(")_(")
 	*/
 	SetSensorLight(IN_1);
 	SetSensorLight(IN_2);
@@ -140,9 +140,9 @@ sub init(){
 }
 
 task main(){
-  init();
+	init();
 	while(true){
-	  special();
+		special();
 		move();
 	}
 }
