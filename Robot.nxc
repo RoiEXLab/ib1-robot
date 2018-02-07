@@ -6,11 +6,11 @@
 #define THRESHOLD 40
 
 // Event Constants
-#define MIN_DISTANCE 0 // TODO: Enddistanz ausmessen
-#define BALL_DISTANCE 0 // TODO: Ballabwurfdistanz ausmessen
-#define LOAD_TIME 0 // TODO: Beladezeit rausfinden
-#define FELT_DOWN 0 // TODO: Abstand für Schiebeaufgabe
 #define START_TURN_DISTANCE 20 // TODO: Satz des Pythagoras
+#define END_DISTANCE 20 // TODO: Pythagoras
+#define BALL_LOAD_DISTANCE 20 // TODO: Pythagoras
+#define BALL_LOAD_WAITING_TIME 0 // TODO: Beladezeit rausfinden
+#define OBSTACLE_CONTACT_DISTANCE 0 // TODO: Abstand für Schiebeaufgabe
 
 // Dumping
 #define DUMP_TIME 1
@@ -22,11 +22,11 @@ int whiteCount = 0;
 sub check_for_special_event() {
 	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD && current_state != START) {
 		whiteCount++;
-	}	else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < MIN_DISTANCE) {
+	}	else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < END_DISTANCE) {
 		current_state = END;
 	}	else if (whiteCount >= 3) {
 		current_state = PUSH;
-	}	else if (SensorUS(IN_4) < BALL_DISTANCE) {
+	}	else if (SensorUS(IN_4) < BALL_LOAD_DISTANCE) {
 		current_state = GET;
 	}
 }
@@ -61,13 +61,13 @@ sub dump() {
 
 sub catch_ball() {
 	Off(OUT_AB);
-	Wait(LOAD_TIME);
+	Wait(BALL_LOAD_WAITING_TIME);
 	current_state = DEF;
 }
 
 sub push_obstacle() {
 	turn_degrees(90, 75);
-	while (SensorUS(IN_4) < FELT_DOWN) {
+	while (SensorUS(IN_4) < OBSTACLE_CONTACT_DISTANCE) {
 		OnRev(OUT_AB, 50);
 		Wait(10);
 	}
