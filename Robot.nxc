@@ -41,7 +41,7 @@ sub turn_degrees(float degrees, int speed) {
 }
 
 sub check_for_special_event() {
-	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD && current_state != INIT) {
+	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD && current_state == MOVE_2) {
 		whiteCount++;
 	}	else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < END_DISTANCE && current_state == MOVE_4) {
 		current_state = END;
