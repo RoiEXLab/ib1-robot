@@ -16,20 +16,8 @@
 #define DUMP_TIME 1
 #define DUMP_SPEED 50
 
-enum State { START, DEF, GET, PUSH, END } current_state;
+enum State { START, MOVE_1, GET, MOVE_2, PUSH, MOVE_3, MOVE_4, END } current_state;
 int whiteCount = 0;
-
-sub check_for_special_event() {
-	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD && current_state != START) {
-		whiteCount++;
-	}	else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < END_DISTANCE) {
-		current_state = END;
-	}	else if (whiteCount >= 3) {
-		current_state = PUSH;
-	}	else if (SensorUS(IN_4) < BALL_LOAD_DISTANCE) {
-		current_state = GET;
-	}
-}
 
 sub turn_degrees(float degrees, int speed) {
 	float signedSpeed = speed * (degrees / abs(degrees));
@@ -42,10 +30,26 @@ sub turn_degrees(float degrees, int speed) {
 	Off(OUT_AB);
 }
 
+sub check_for_special_event() {
+	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD && current_state != START) {
+		whiteCount++;
+	}	else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < END_DISTANCE && current_state == MOVE_4) {
+		current_state = END;
+	}	else if (whiteCount == 3 && current_state == MOVE_2) {
+		current_state = PUSH;
+	}	else if (SensorUS(IN_4) < BALL_LOAD_DISTANCE && current_state == MOVE_1) {
+		current_state = GET;
+	} else if (current_state == MOVE_3 && SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD) {
+		turn_degrees(90, 75); // TODO: This is inconsistent, use a dedicated state if enough time is left
+		current_state = MOVE_4;
+	}
+}
+
+
 sub turn_after_start() {
 	if (SensorUS(IN_4) < START_TURN_DISTANCE && SENSOR_2 > THRESHOLD) {
 		turn_degrees(200, 100);
-		current_state = DEF;
+		current_state = MOVE_1;
 	}
 }
 
@@ -62,16 +66,17 @@ sub dump() {
 sub catch_ball() {
 	Off(OUT_AB);
 	Wait(BALL_LOAD_WAITING_TIME);
-	current_state = DEF;
+	current_state = MOVE_2;
 }
 
 sub push_obstacle() {
 	turn_degrees(90, 75);
 	while (SensorUS(IN_4) < OBSTACLE_CONTACT_DISTANCE) {
 		OnRev(OUT_AB, 50);
+		// Use move() or something
 		Wait(10);
 	}
-	current_state = DEF;
+	current_state = MOVE_3;
 }
 
 inline float get_turn_degrees() {
