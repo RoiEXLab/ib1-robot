@@ -1,19 +1,26 @@
-#define MAX_DISTANCE_MS 0.31 // 0.07705
+// Movement
+#define MAX_DISTANCE_MS 0.31
 #define DISTANCE_TIRES_MM 165
+
+// Optic Sensor
 #define THRESHOLD 40
-#define MIN_DISTANCE 0 //TODO: Enddistanz ausmessen
-#define BALL_DISTANCE 0 //TODO: Ballabwurfdistanz ausmessen
-#define LOAD_TIME 0 //TODO: Beladezeit rausfinden
-#define FELT_DOWN 0 //TODO: Abstand für Schiebeaufgabe
+
+// Event Constants
+#define MIN_DISTANCE 0 // TODO: Enddistanz ausmessen
+#define BALL_DISTANCE 0 // TODO: Ballabwurfdistanz ausmessen
+#define LOAD_TIME 0 // TODO: Beladezeit rausfinden
+#define FELT_DOWN 0 // TODO: Abstand für Schiebeaufgabe
+
+// Dumping
 #define DUMP_TIME 1
 #define DUMP_SPEED 50
 
 enum State { START, DEF, GET, PUSH, END } current_state;
-int whiteCount = 0; // Nazi Constant (zwar nicht konstant, aber nazi)
+int whiteCount = 0;
 
 sub eventChecker() {
 	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD) {
-		whiteCount++; // Nazi spotted
+		whiteCount++;
 	}
 	else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < MIN_DISTANCE) {
 		current_state = END;
@@ -128,11 +135,6 @@ sub special() {
 sub init() {
 	current_state = START;
 	//Sensor 1 LEFT 2 MIDDLE 3 RIGHT
-	/*
-	(\_/)
-	( •,•)
-	(")_(")
-	*/
 	SetSensorLight(IN_1);
 	SetSensorLight(IN_2);
 	SetSensorLight(IN_3);
