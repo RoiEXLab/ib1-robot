@@ -29,6 +29,8 @@ enum State {
 State currentState;
 int whiteCount = 0;
 
+sub move();
+
 sub turnDegrees(float degrees, int speed) {
 	float signedSpeed = speed * (degrees / abs(degrees));
 	OnFwd(OUT_A, signedSpeed);
@@ -43,13 +45,17 @@ sub turnDegrees(float degrees, int speed) {
 sub checkForSpecialEvent() {
 	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD && currentState == MOVE_2) {
 		whiteCount++;
-	}	else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < END_DISTANCE && currentState == MOVE_4) {
+	}
+  else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < END_DISTANCE && currentState == MOVE_4) {
 		currentState = END;
-	}	else if (whiteCount == 3 && currentState == MOVE_2) {
+	}
+  else if (whiteCount == 3 && currentState == MOVE_2) {
 		currentState = PUSH;
-	}	else if (SensorUS(IN_4) < BALL_LOAD_DISTANCE && currentState == MOVE_1) {
+	}
+  else if (SensorUS(IN_4) < BALL_LOAD_DISTANCE && currentState == MOVE_1) {
 		currentState = GET;
-	} else if (currentState == MOVE_3 && SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD) {
+	}
+  else if (currentState == MOVE_3 && SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD) {
 		turnDegrees(90, 75); // TODO: This is inconsistent, use a dedicated state if enough time is left
 		currentState = MOVE_4;
 	}
@@ -79,10 +85,10 @@ sub catchBall() {
 }
 
 sub pushObstacle() {
-	turnDegrees(90, 75);
+	turnDegrees(120, 75);
 	while (SensorUS(IN_4) < OBSTACLE_CONTACT_DISTANCE) {
-		OnRev(OUT_AB, 50);
-		// Use move() or something
+		// OnRev(OUT_AB, 50);
+		move();
 		Wait(10);
 	}
 	currentState = MOVE_3;
