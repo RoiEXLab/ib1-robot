@@ -6,11 +6,10 @@
 #define THRESHOLD 40
 
 // Event Constants
-#define START_TURN_DISTANCE 20 // TODO: Satz des Pythagoras
-#define END_DISTANCE 20 // TODO: Pythagoras
-#define BALL_LOAD_DISTANCE 20 // TODO: Pythagoras
-#define BALL_LOAD_WAITING_TIME 0 // TODO: Beladezeit rausfinden
-#define OBSTACLE_CONTACT_DISTANCE 0 // TODO: Abstand für Schiebeaufgabe
+#define START_TURN_DISTANCE 20
+#define END_DISTANCE 20
+#define BALL_LOAD_DISTANCE 15
+#define OBSTACLE_CONTACT_DISTANCE 15
 
 // Dumping
 #define DUMP_TIME 1
@@ -43,33 +42,34 @@ sub turnDegrees(float degrees, int speed) {
 }
 
 sub checkForSpecialEvent() {
-	if (SENSOR_1 > THRESHOLD && SENSOR_2 > THRESHOLD && SENSOR_3 > THRESHOLD && currentState == MOVE_2) {
+	if ((SENSOR_1 > THRESHOLD || SENSOR_3 > THRESHOLD) && SENSOR_2 > THRESHOLD && currentState == MOVE_2) {
 		whiteCount++;
+		PlaySound(SOUND_DOUBLE_BEEP);
 	}
   else if (SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD && SensorUS(IN_4) < END_DISTANCE && currentState == MOVE_4) {
 		currentState = END;
 	}
-  else if (whiteCount == 3 && currentState == MOVE_2) {
+  else if (whiteCount >= 2 && currentState == MOVE_2) {
 		currentState = PUSH;
 	}
   else if (SensorUS(IN_4) < BALL_LOAD_DISTANCE && currentState == MOVE_1) {
 		currentState = GET;
 	}
-  else if (currentState == MOVE_3 && SENSOR_1 <= THRESHOLD && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD) {
-		turnDegrees(90, 75); // TODO: This is inconsistent, use a dedicated state if enough time is left
+  else if (currentState == MOVE_3 && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD) {
+		turnDegrees(110, 75); // TODO: This is inconsistent, use a dedicated state if enough time is left
 		currentState = MOVE_4;
 	}
 }
 
 sub turnAfterStart() {
-	if (SensorUS(IN_4) < START_TURN_DISTANCE && SENSOR_2 > THRESHOLD) {
-		turnDegrees(200, 100);
+	if (SensorUS(IN_4) < START_TURN_DISTANCE) {
+		turnDegrees(250, 100);
 		currentState = MOVE_1;
 	}
 }
 
 sub dump() {
-	Wait(500);
+	Wait(300);
 	Off(OUT_AB);
 	OnFwd(OUT_C, DUMP_SPEED);
 	Wait(DUMP_TIME * 1000);
@@ -80,17 +80,19 @@ sub dump() {
 
 sub catchBall() {
 	Off(OUT_AB);
-	Wait(BALL_LOAD_WAITING_TIME);
+  until(SensorUS(IN_4) >= 20);
 	currentState = MOVE_2;
 }
 
 sub pushObstacle() {
-	turnDegrees(120, 75);
-	while (SensorUS(IN_4) < OBSTACLE_CONTACT_DISTANCE) {
-		// OnRev(OUT_AB, 50);
+	turnDegrees(105, 75);
+	while (SensorUS(IN_4) > OBSTACLE_CONTACT_DISTANCE) {
 		move();
-		Wait(10);
 	}
+	while (SensorUS(IN_4) <= OBSTACLE_CONTACT_DISTANCE) {
+		move();
+	}
+	turnDegrees(200, 75);
 	currentState = MOVE_3;
 }
 
@@ -106,7 +108,7 @@ inline float getTurnDegrees() {
 			if(SENSOR_3 < THRESHOLD) {
 				return 0;
 			} else {
-				return -19;
+				return -9;
 			}
 		}
 	} else {
@@ -129,7 +131,7 @@ inline float getTurnDegrees() {
 sub move() {
 	float degrees = getTurnDegrees();
 	turnDegrees(degrees, 80);
-	OnRev(OUT_AB, 100);
+	OnRev(OUT_AB, currentState == MOVE_2 ? 50 : 100);
 	Wait(10);
 }
 
@@ -137,6 +139,7 @@ sub runSpecialEventIfAvailable() {
 	switch(currentState) {
 		case INIT:
 			turnAfterStart();
+			break;
 		case GET:
 			catchBall();
 			break;
@@ -151,7 +154,7 @@ sub runSpecialEventIfAvailable() {
 }
 
 sub init() {
-	currentState = INIT;
+	currentState = MOVE_2;
 	//Sensor 1 LEFT 2 MIDDLE 3 RIGHT
 	SetSensorLight(IN_1);
 	SetSensorLight(IN_2);
