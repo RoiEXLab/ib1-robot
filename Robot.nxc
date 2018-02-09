@@ -92,6 +92,9 @@ sub pushObstacle() {
 	while (SensorUS(IN_4) <= OBSTACLE_CONTACT_DISTANCE) {
 		move();
 	}
+	while (SensorUS(IN_4) > OBSTACLE_CONTACT_DISTANCE) {
+		move();
+	}
 	turnDegrees(200, 75);
 	currentState = MOVE_3;
 }
