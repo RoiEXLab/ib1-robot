@@ -30,8 +30,8 @@ int whiteCount = 0;
 
 sub move();
 
-sub turnDegrees(float degrees, int speed) {
-	float signedSpeed = speed * (degrees / abs(degrees));
+sub turnDegrees(int degrees, int speed) {
+	float signedSpeed = speed * (degrees / (abs(degrees) * 1.0));
 	OnFwd(OUT_A, signedSpeed);
 	OnRev(OUT_B, signedSpeed);
 	float distance = abs(PI * DISTANCE_TIRES_MM * (degrees / 360.0));
@@ -55,15 +55,18 @@ sub checkForSpecialEvent() {
   else if (SensorUS(IN_4) < BALL_LOAD_DISTANCE && currentState == MOVE_1) {
 		currentState = GET;
 	}
-  else if (currentState == MOVE_3 && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD) {
-		turnDegrees(110, 75); // TODO: This is inconsistent, use a dedicated state if enough time is left
+  else if (currentState == MOVE_3){// && SENSOR_2 <= THRESHOLD && SENSOR_3 <= THRESHOLD) {
+		//turnDegrees(110, 75); // TODO: This is inconsistent, use a dedicated state if enough time is left
 		currentState = MOVE_4;
 	}
 }
 
 sub turnAfterStart() {
 	if (SensorUS(IN_4) < START_TURN_DISTANCE) {
-		turnDegrees(250, 100);
+    turnDegrees(90, 100);
+    while(SENSOR_1 < THRESHOLD || SENSOR_2 >= THRESHOLD || SENSOR_3 < THRESHOLD){
+     turnDegrees(5, 100);
+    }
 		currentState = MOVE_1;
 	}
 }
@@ -85,17 +88,17 @@ sub catchBall() {
 }
 
 sub pushObstacle() {
-	turnDegrees(105, 75);
-	while (SensorUS(IN_4) > OBSTACLE_CONTACT_DISTANCE) {
-		move();
-	}
-	while (SensorUS(IN_4) <= OBSTACLE_CONTACT_DISTANCE) {
-		move();
-	}
-	while (SensorUS(IN_4) > OBSTACLE_CONTACT_DISTANCE) {
-		move();
-	}
-	turnDegrees(200, 75);
+	//turnDegrees(105, 75);
+	//while (SensorUS(IN_4) > OBSTACLE_CONTACT_DISTANCE) {
+	//	move();
+	//}
+	//while (SensorUS(IN_4) <= OBSTACLE_CONTACT_DISTANCE) {
+	//	move();
+	//}
+	//while (SensorUS(IN_4) > OBSTACLE_CONTACT_DISTANCE) {
+	//	move();
+	//}
+	//turnDegrees(200, 75);
 	currentState = MOVE_3;
 }
 
@@ -134,7 +137,7 @@ inline int getTurnDegrees() {
 sub move() {
 	int degrees = getTurnDegrees();
 	turnDegrees(degrees, 80);
-	OnRev(OUT_AB, currentState == MOVE_2 ? 50 : 100);
+	OnRev(OUT_AB, 100);
 	Wait(10);
 }
 
