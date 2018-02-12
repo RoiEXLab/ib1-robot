@@ -72,7 +72,7 @@ sub turnAfterStart() {
 }
 
 sub dump() {
-	Wait(300);
+	Wait(500);
 	Off(OUT_AB);
 	OnFwd(OUT_C, DUMP_SPEED);
 	Wait(DUMP_TIME * 1000);
