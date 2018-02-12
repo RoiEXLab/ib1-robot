@@ -99,7 +99,7 @@ sub pushObstacle() {
 	currentState = MOVE_3;
 }
 
-inline float getTurnDegrees() {
+inline int getTurnDegrees() {
 	if(SENSOR_1 < THRESHOLD) {
 		if(SENSOR_2 < THRESHOLD) {
 			if(SENSOR_3 < THRESHOLD) {
@@ -132,7 +132,7 @@ inline float getTurnDegrees() {
 }
 
 sub move() {
-	float degrees = getTurnDegrees();
+	int degrees = getTurnDegrees();
 	turnDegrees(degrees, 80);
 	OnRev(OUT_AB, currentState == MOVE_2 ? 50 : 100);
 	Wait(10);
@@ -157,7 +157,7 @@ sub runSpecialEventIfAvailable() {
 }
 
 sub init() {
-	currentState = MOVE_2;
+	currentState = INIT;
 	//Sensor 1 LEFT 2 MIDDLE 3 RIGHT
 	SetSensorLight(IN_1);
 	SetSensorLight(IN_2);
